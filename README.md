@@ -1,157 +1,125 @@
 # Système d'Analyse et Classification de Documents
 
-Projet académique -- Master 1 Informatique\
-La Rochelle Université\
-EC 260-1-81 -- Approches Expérimentales
+**Projet de Synthèse - Master 1 Informatique (La Rochelle Université)**
+*EC 260-1-81 - Approches Expérimentales*
 
-------------------------------------------------------------------------
+## Description
 
-## Objectif du projet
+Ce projet implémente une chaîne complète de vision par ordinateur ("Computer Vision Pipeline") capable d'analyser une image de carte, de déterminer son type via un **Réseau de Neurones Artificiel (Deep Learning)**, et d'en extraire les informations textuelles spécifiques via **OCR**.
 
-Développement d'une pipeline complète de Computer Vision capable de :
+Le système répond aux deux challenges du sujet :
 
-1.  Classifier automatiquement une carte parmi trois catégories :
-    -   Carte Étudiant\
-    -   Carte d'Identité\
-    -   Carte de Fidélité
-2.  Extraire des informations textuelles spécifiques via OCR :
-    -   Numéro INE\
-    -   Zone MRZ\
-    -   Année universitaire\
-    -   Identifiants divers
+1.  [cite_start]**Extraction d'information :** Localisation de photos, lecture de zones spécifiques (INE, MRZ, etc.)[cite: 48, 51, 52].
+2.  [cite_start]**Classification :** Distinction automatique entre 3 classes (Carte Étudiant, Carte d'Identité, Carte de Fidélité)[cite: 54].
 
-Le projet combine Deep Learning, traitement d'image et OCR dans une
-architecture modulaire.
+-----
 
-------------------------------------------------------------------------
+## Fonctionnalités Clés
 
-## Fonctionnalités principales
+  * [cite_start]**Prétraitement d'image :** Redimensionnement, conversion sémantique (HSV/Gris), et réduction de bruit par filtrage Gaussien[cite: 37, 39, 40].
+  * **Extraction de Caractéristiques (Features Engineering) :**
+      * Analyse colorimétrique (Moyennes RGB + Saturation).
+      * Détection de visage (Algorithme de Viola-Jones / Haar Cascade).
+      * Analyse de densité textuelle (Détection de contours Canny).
+  * **Classification Intelligente :** Utilisation d'un Perceptron Multi-Couches (MLP) sous **PyTorch**.
+  * **Extraction OCR (Tesseract) :** Lecture ciblée des zones d'intérêt (Numéro INE, Année, Zone MRZ) selon la classe prédite.
+  * **Visualisation :** Génération automatique de la courbe d'apprentissage (`Loss Curve`).
 
-### Prétraitement d'image
+-----
 
--   Redimensionnement
--   Conversion HSV / niveaux de gris
--   Filtrage Gaussien pour réduction du bruit
+## Structure du Projet
 
-### Extraction de caractéristiques (Feature Engineering)
+```text
+Projet_Classification/
+│
+├── README.md                      # Documentation du projet
+├── train_pytorch.py               # Script d'entraînement du réseau de neurones
+├── main.py                        # Script de démonstration (Inférence + OCR)
+├── model.pth                      # Le modèle entraîné (généré après entraînement)
+├── courbe_perte.png               # Graphique de performance (généré après entraînement)
+├── haarcascade_frontalface_default.xml  # Modèle OpenCV pour les visages
+│
+├── 📁 modules/                       # Bibliothèque de fonctions
+│   ├── __init__.py
+│   └── features.py                   # Moteur d'extraction et OCR
+│
+└── 📁 data/                          # Jeu de données
+    ├── train/                        # Images pour l'apprentissage
+    │   ├── etudiant/
+    │   ├── identite/
+    │   └── fidelite/
+    └── test/                         # Images pour la validation
+```
 
--   Moyennes colorimétriques (RGB + saturation)
--   Détection de visage (Haar Cascade -- OpenCV)
--   Détection de contours (Canny) pour estimation de densité textuelle
+-----
 
-### Classification
+##  Prérequis et Installation
 
--   Implémentation d'un Perceptron Multi-Couches (MLP) avec PyTorch
--   Entraînement supervisé sur dataset personnalisé
--   Génération automatique de la courbe de perte
+### 1\. Environnement Python
 
-### OCR
+Le projet nécessite Python 3.8+ et les librairies suivantes :
 
--   Intégration de Tesseract OCR
--   Extraction ciblée selon la classe prédite
--   Localisation dynamique des zones d'intérêt
-
-### Visualisation
-
--   Génération automatique de la courbe d'apprentissage
-    (`courbe_perte.png`)
--   Interface interactive pour navigation entre images test
-
-------------------------------------------------------------------------
-
-## Architecture du projet
-
-Classification/ │ ├── README.md ├── train_pytorch.py ├── main.py ├──
-model.pth ├── courbe_perte.png ├── haarcascade_frontalface_default.xml │
-├── modules/ │ ├── **init**.py │ └── features.py │ └── data/ ├── train/
-│ ├── etudiant/ │ ├── identite/ │ └── fidelite/ └── test/
-
-------------------------------------------------------------------------
-
-## Architecture du modèle
-
-Type : Perceptron Multi-Couches (MLP)
-
-Entrée (6 features) : - Moyenne Rouge\
-- Moyenne Verte\
-- Moyenne Bleue\
-- Saturation\
-- Présence visage (0/1)\
-- Densité textuelle
-
-Couche cachée : - 16 neurones\
-- Fonction d'activation ReLU
-
-Sortie : - 3 neurones (probabilités pour Étudiant, Identité, Fidélité)
-
-------------------------------------------------------------------------
-
-## Installation
-
-### Environnement Python
-
-Python 3.8 ou supérieur recommandé.
-
+```bash
 pip install torch torchvision numpy opencv-python matplotlib pytesseract
+```
 
-### Installation de Tesseract OCR
+### 2\. Moteur OCR (Tesseract)
 
-Installer Tesseract OCR selon votre système d'exploitation.\
-Configurer le chemin d'accès si nécessaire dans `modules/features.py`.
+Ce projet utilise Tesseract pour la lecture de texte.
 
-------------------------------------------------------------------------
+  * **Télécharger :** [Tesseract-OCR for Windows](https://www.google.com/search?q=https://github.com/UB-Mannheim/tesseract/wiki)
+  * **Installation :** Installez-le dans le dossier par défaut (`C:\Program Files\Tesseract-OCR`).
+  * **Configuration :** Le chemin est configuré dans `modules/features.py`.
 
-## Utilisation
+### 3\. Fichiers de données
 
-### 1. Entraînement du modèle
+  * Placez vos images d'entraînement dans `data/train/{classe}`.
+  * Placez le fichier `haarcascade_frontalface_default.xml` à la racine.
 
-python train_pytorch.py
+-----
 
-Résultats générés : - model.pth - courbe_perte.png
+##  Guide d'Utilisation
 
-### 2. Lancer la démonstration
+### Étape 1 : Entraînement du Modèle 
 
-python main.py
+Avant de classifier, l'IA doit apprendre à partir de vos données.
 
-Fonctionnement : - Prédiction de la classe - Détection des zones
-d'intérêt - Lecture OCR - Navigation interactive (Espace pour image
-suivante, Échap pour quitter)
+```powershell
+py train_pytorch.py
+```
 
-------------------------------------------------------------------------
+  * **Ce que ça fait :** Scanne le dossier `data/train`, extrait les vecteurs de caractéristiques, entraîne le réseau de neurones sur 1000 époques.
+  * **Résultat :** Crée le fichier `model.pth` et le graphique `courbe_perte.png`.
 
-## Méthodologie
+### Étape 2 : Lancement de la Démonstration 
 
-Approche hybride :
+Une fois le modèle entraîné, lancez l'application principale.
 
-1.  Feature Engineering classique\
-2.  Classification par réseau de neurones\
-3.  Post-traitement basé sur règles géométriques\
-4.  Extraction OCR ciblée
+```powershell
+py main.py
+```
 
-------------------------------------------------------------------------
+  * **Ce que ça fait :** Scanne les images, prédit leur type, localise les informations (Cadres de couleur) et lit le texte (INE, Nom, etc.).
+  * **Contrôles :** Appuyez sur `ESPACE` pour passer à l'image suivante, ou `ECHAP` pour quitter.
 
-## Compétences techniques mobilisées
+-----
 
--   Python
--   Deep Learning (PyTorch)
--   Traitement d'image (OpenCV)
--   OCR (Tesseract)
--   Feature Engineering
--   Gestion de dataset
--   Visualisation (Matplotlib)
+## Méthodologie Technique
 
-------------------------------------------------------------------------
+### Architecture du Réseau de Neurones
 
-## Perspectives d'amélioration
+Le modèle est un **Perceptron Multi-Couches (MLP)** simple mais efficace pour ce volume de données :
 
--   Remplacer le MLP par un réseau convolutif (CNN)
--   Augmenter la taille du dataset
--   Déploiement via API (Flask ou FastAPI)
--   Intégration d'un modèle de détection d'objet (YOLO, Faster-RCNN)
+  * **Entrée (6 neurones) :** Rouge, Vert, Bleu, Saturation, Présence Visage (0/1), Densité Texte.
+  * **Couche Cachée (16 neurones) :** Fonction d'activation ReLU.
+  * **Sortie (3 neurones) :** Probabilités pour [Étudiant, Identité, Fidélité].
 
-------------------------------------------------------------------------
+### Stratégie d'Extraction (Post-Classification)
 
-## Auteur
+Une fois la classe déterminée par l'IA, le programme applique des règles géométriques pour l'OCR :
 
-Anouar Sedki\
-Master 1 Informatique -- La Rochelle Université
+  * **Si Étudiant :** Recherche zone "INE" en bas à gauche + "Année" au milieu droite.
+  * **Si Identité :** Recherche zone "MRZ" (bande optique) en bas.
+  * **Si Fidélité :** Recherche code barre ou numéro client.
+
+-----
